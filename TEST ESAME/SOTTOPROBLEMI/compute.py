@@ -64,10 +64,12 @@ def compute_daily_max_difference (time_series):
             counter = counter + 1
         if item[0] < current_day or item[0] >= (current_day+172800): #se c'è un timestamp fuori posto, quindi se precede il giorno corrente o se salta un giorno...
             raise ExamException ("Errore: c'è un timestamp fuori posto") #...alzo un'eccezione
-        if (item[0] >= (current_day + 86400) and item[0] < (current_day+172800)) or counter == len(time_series): #se il timestamp appartiene al giorno successivo o sono alla fine della lista...
+        if (item[0] >= (current_day + 86400) and item[0] < (current_day+172800)) or counter == (len(time_series)+1): #se il timestamp appartiene al giorno successivo o sono alla fine della lista...
             diff_list.append(diff_maxmin(tmp_list)) #passo lista temporanea a funzione che calcola differenza massima e aggiungo il risultato alla lista che dovrò ritornare
             current_day = current_day + 86400 #passo al giorno successivo
+            print(tmp_list)
             tmp_list = [item[1]] #istanzio di nuovo la lista temporanea a vuota
+    print(len(diff_list))
     return diff_list
             
         
