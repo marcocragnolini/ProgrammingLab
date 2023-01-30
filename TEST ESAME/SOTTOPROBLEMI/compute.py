@@ -53,18 +53,23 @@ def diff_maxmin (numeric_list):
         return None
             
 def compute_daily_max_difference (time_series):
-    tmp = time_series[0] #assegno a tmp la prima sottolista della lista time_series
-    current_day = tmp[0]-(tmp[0]%86400)
+    current = time_series[0] #assegno a tmp la prima sottolista della lista time_series
+    current_day = current[0]-(current[0]%86400) #creo una variabile che contenga il l'inizio del giorno corrente, inizialmente il primo
+    last = time_series[len(time_series)-1] #creo una lista che contenga l'ultima sottolista della lista time_series
+    last_day = last[0] - (last[0]%86400) #creo una variabile che contenga l'inizio dell'ultimo giorno della lista time_series
+    #print(last_day)
     diff_list = [] #creo una lista che conterrà le differenze massime di ogni giornata
     tmp_list = [] #creo una lista temporanea che passerò a una funzione di supporto che me ne calcola differenza massima
     counter = 1 #creo un contatore che tenga traccia di dove sono nella lista
-    for item in time_series:
+    for item in time_series: #per ogni sottolista (item) di time_series
         if item[0] < (current_day + 86400) and (item[0] >= current_day): #se il timestamp appartiene al giorno in questione...
             tmp_list.append(item[1]) #...aggiungo la temperatura alla lista temporanea
             counter = counter + 1
         if item[0] < current_day or item[0] >= (current_day+172800): #se c'è un timestamp fuori posto, quindi se precede il giorno corrente o se salta un giorno...
             raise ExamException ("Errore: c'è un timestamp fuori posto") #...alzo un'eccezione
-        if (item[0] >= (current_day + 86400) and item[0] < (current_day+172800)) or counter == (len(time_series)+1): #se il timestamp appartiene al giorno successivo o sono alla fine della lista...
+        if current_day == last_day:
+            tmp_list.append(item[1])
+        if (item[0] >= (current_day + 86400) and item[0] < (current_day+172800)): #se il timestamp appartiene al giorno successivo o sono alla fine della lista...
             diff_list.append(diff_maxmin(tmp_list)) #passo lista temporanea a funzione che calcola differenza massima e aggiungo il risultato alla lista che dovrò ritornare
             current_day = current_day + 86400 #passo al giorno successivo
             print(tmp_list)
@@ -88,4 +93,6 @@ class ExamException (Exception):
 time_series_file = CSVTimeSeriesFile('data.csv')
 time_series = time_series_file.get_data()
 #print(time_series)
-print(compute_daily_max_difference(time_series))
+diff = compute_daily_max_difference(time_series)
+for item in diff:
+    print(item)
