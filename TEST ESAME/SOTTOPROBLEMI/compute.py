@@ -1,5 +1,3 @@
-
-
 class CSVFile ():
     def __init__ (self,name):
         self.name = name
@@ -61,6 +59,12 @@ def diff_maxmin (numeric_list):
         return None #...quindi torno None
             
 def compute_daily_max_difference (time_series):
+    if time_series is None:
+        raise ExamException ('Errore: la lista è None')
+    if not isinstance (time_series, list):
+        raise ExamException ("Errore: l'argomento non è una lista")
+    if len(time_series) == 0:
+        raise ExamException ("Errore: la lista data è vuota")
     current = time_series[0] #assegno a tmp la prima sottolista della lista time_series
     previous_timestamp = current[0] #assegno di default il timestamp precedente al primo 
     current_day = current[0]-(current[0]%86400) #creo una variabile che contenga il l'inizio del giorno corrente, inizialmente il primo
