@@ -58,11 +58,11 @@ def diff_maxmin (numeric_list):
     if len(numeric_list) > 1: #se la lista ha più di un valore...
         return max-min #ritorno la differenza tra massimo e minimo della lista...
     else: #...altrimenti ce n'è solo uno...
-        return None #...quindi torno 
+        return None #...quindi torno None
             
 def compute_daily_max_difference (time_series):
     current = time_series[0] #assegno a tmp la prima sottolista della lista time_series
-    previous_timestamp = current[0]
+    previous_timestamp = current[0] #assegno di default il timestamp precedente al primo 
     current_day = current[0]-(current[0]%86400) #creo una variabile che contenga il l'inizio del giorno corrente, inizialmente il primo
     last = time_series[len(time_series)-1] #creo una lista che contenga l'ultima sottolista della lista time_series
     last_day = last[0] - (last[0]%86400) #creo una variabile che contenga l'inizio dell'ultimo giorno della lista time_series
@@ -72,20 +72,20 @@ def compute_daily_max_difference (time_series):
     tmp_list = [] #creo una lista temporanea che passerò a una funzione di supporto che me ne calcola differenza massima
     counter = 1 #creo un contatore che tenga traccia di dove sono nella lista
     for item in time_series: #per ogni sottolista (item) di time_series
-        if previous_timestamp == item[0] and counter > 1:
-            raise ExamException ('Errore: ci sono due timestamp consecutivi uguali')
-        else:
-            previous_timestamp = item[0]
+        if previous_timestamp == item[0] and counter > 1: #se il timestamp attuale è uguale a quello precedente (salvo sia al primo ciclo for; in quel caso ovviamente sarebbero uguali visto che ho assegnato previous_timestamp al primo timestamp di default)...
+            raise ExamException ('Errore: ci sono due timestamp consecutivi uguali') #...alzo un eccezione...
+        else: #...altrimenti...
+            previous_timestamp = item[0] #...riassegno il timestamp precedente a quello attuale
         if item[0] < (current_day + 86400) and (item[0] >= current_day): #se il timestamp appartiene al giorno in questione...
             tmp_list.append(item[1]) #...aggiungo la temperatura alla lista temporanea
-            counter = counter + 1
+            counter = counter + 1 #incremento il contatore
         if item[0] < current_day or item[0] >= (current_day+172800): #se c'è un timestamp fuori posto, quindi se precede il giorno corrente o se salta un giorno...
             raise ExamException ("Errore: c'è un timestamp fuori posto") #...alzo un'eccezione
         if (item[0] >= (current_day + 86400) and item[0] < (current_day+172800)) or (current_day == last_day and counter == len(time_series) + 1): #se il timestamp appartiene al giorno successivo o sono all'ultimo giorno e all'ultimo valore...
             diff_list.append(diff_maxmin(tmp_list)) #passo lista temporanea a funzione che calcola differenza massima e aggiungo il risultato alla lista che dovrò ritornare
             current_day = current_day + 86400 #passo al giorno successivo
-            counter = counter + 1
-            tmp_list = [item[1]] #istanzio la lista alla temperatura corrente; se instanziassi a vuota salterei ogni volta un valore 
+            counter = counter + 1 #incremento il contatore
+            tmp_list = [item[1]] #istanzio la lista temporanea alla temperatura corrente; se instanziassi a vuota salterei ogni volta il primo valore della giornata
             if current_day == last_day and second_last_day!=last_day: #se l'ultimo e il penultimo giorno non corrispondono significa che l'ultimo è un valore isolato, quindi devo gestirlo a parte
                 diff_list.append(diff_maxmin(tmp_list))
     return diff_list
