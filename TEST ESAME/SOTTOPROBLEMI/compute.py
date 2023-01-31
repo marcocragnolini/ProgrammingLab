@@ -1,3 +1,5 @@
+
+
 class CSVFile ():
     def __init__ (self,name):
         self.name = name
@@ -24,33 +26,39 @@ class CSVTimeSeriesFile (CSVFile):
             cleaned_line = line.strip('\n') #ripulisco la riga dal carattere speciale \n
             elements = cleaned_line.split(',') #divido alla virgola così da separare i due elementi
             try: #provo a trasformare gli elementi della riga in numerici per poterli utilizzare dopo
-                elements[0] = int(elements[0]) #il timestamp in intero (float non ha senso)
-                elements[1] = float(elements[1]) #la temperatura in float (se no approssimo)
+                elements[0] = float(elements[0]) #il timestamp in float per evitare che sia saltato nel caso in cui sia un decimale (o che dia un errore)...
+                elements[0] = int(elements[0]) #...poi lo trasformo in intero
+                elements[1] = float(elements[1]) #la temperatura in float 
             except ValueError:
                 continue
             except TypeError:
                 continue
             except Exception:
                 continue
+            if elements[0] < elements[1]: #nel caso in cui il timestamp sia minore della temperatura (cosa impossibile a meno che non siamo entro il primo minuto del primo gennaio del 1970), lo salto 
+                continue
             time_series_list.append(elements) #aggiungo la lista elements alla lista che dovrò ritornare
         if len(time_series_list) == 0: #controllo che il file non fosse vuoto verificando che non mi abbia creato una lista vuota
             raise ExamException ('Errore: il file ha creato una lista vuota')
         if time_series_list is None: #controllo che la lista non sia None anche se è improbabile
             raise ExamException ('Errore: la lista è None')
+        if not isinstance(time_series_list,list):
+            raise ExamException ('Errore: la lista non è una lista')
+        print (time_series_list)
         return time_series_list
 
 def diff_maxmin (numeric_list):
     min = numeric_list[0] #assumo che il minimo sia il primo valore
     max = numeric_list[0] #assumo anche che il massimo sia il primo valore
-    for i in range(1,len(numeric_list)):
-        if numeric_list[i] >= max: 
-            max = numeric_list[i]
-        if numeric_list[i] <= min:
-            min = numeric_list[i]
-    if max!=min: #se massimo e minimo sono diversi significa che ci sono almeno due valori...
-        return max-min
-    else: #...altrimenti ce n'è solo uno e devo tornare None
-        return None
+    for i in range(1,len(numeric_list)): #finchè sono nella lista
+        if numeric_list[i] >= max: #se il valore attuale è maggiore del massimo...
+            max = numeric_list[i] #...assegno al massimo il valore attuale
+        if numeric_list[i] <= min: #se il valore attuale è minore del minimo...
+            min = numeric_list[i] #...assegno al minimo il valore attuale
+    if len(numeric_list) > 1: #se la lista ha più di un valore...
+        return max-min #ritorno la differenza tra massimo e minimo della lista...
+    else: #...altrimenti ce n'è solo uno...
+        return None #...quindi torno 
             
 def compute_daily_max_difference (time_series):
     current = time_series[0] #assegno a tmp la prima sottolista della lista time_series
@@ -81,7 +89,7 @@ def compute_daily_max_difference (time_series):
             if current_day == last_day and second_last_day!=last_day: #se l'ultimo e il penultimo giorno non corrispondono significa che l'ultimo è un valore isolato, quindi devo gestirlo a parte
                 diff_list.append(diff_maxmin(tmp_list))
     return diff_list
-            
+        
         
             
             
