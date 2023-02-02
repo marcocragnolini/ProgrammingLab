@@ -33,11 +33,21 @@ class CSVTimeSeriesFile (CSVFile):
                 continue
             except Exception:
                 continue
-            if elements[0] < elements[1]: #nel caso in cui il timestamp sia minore della temperatura (cosa impossibile a meno che non siamo entro il primo minuto del primo gennaio del 1970)... 
-                continue #...lo salto
-            if elements[0] < 0: #se il timestamp è negativo...
-                continue #...lo salto
             time_series_list.append(elements) #aggiungo la lista elements alla lista che dovrò ritornare
+        first = time_series_list[0] #assegno a first la prima sottolista di time_series_list
+        previous_timestamp = first[0] #assegno di default il timestamp precedente al primo
+        first_round = True #sono al primo giro quindi lo assegno a vero di default
+        for item in time_series_list:
+            if not first_round and (previous_timestamp < item[0]): #se non sono al primo giro e se il timestamp precedente è minore di quello successivo...
+                previous_timestamp = item[0] #...riassegno il timestamp precedente a quello attuale e...
+                continue #...continuo
+            if first_round: #se sono al primo giro...
+                first_round = False #...riassegno a Falso così da sapere di non essere più al primo giro...
+                continue #...continuo
+            elif previous_timestamp == item[0]: #nel caso ci siano due timestamp consecutivi uguali...
+                raise ExamException ("Errore: ci sono due timestamp consecutivi uguali (get_data)") #...alzo un eccezione
+            else: #nel caso ci sia un timestamp > al suo successivo... 
+                raise ExamException ("Errore: c'è un timestamp fuori posto (get_data)") #...alzo un eccezione
         if len(time_series_list) == 0: #controllo che il file non fosse vuoto verificando che non mi abbia creato una lista vuota
             raise ExamException ('Errore: il file ha creato una lista vuota')
         if time_series_list is None: #controllo che la lista non sia None anche se è improbabile
@@ -84,15 +94,15 @@ def compute_daily_max_difference (time_series):
     tmp_list = [] #creo una lista temporanea che passerò a una funzione di supporto che me ne calcola differenza massima
     counter = 1 #creo un contatore che tenga traccia di dove sono nella lista
     for item in time_series: #per ogni sottolista (item) di time_series
-        if previous_timestamp == item[0] and counter > 1: #se il timestamp attuale è uguale a quello precedente (salvo sia al primo ciclo for; in quel caso ovviamente sarebbero uguali visto che ho assegnato previous_timestamp al primo timestamp di default)...
-            raise ExamException ('Errore: ci sono due timestamp consecutivi uguali') #...alzo un eccezione...
+        if previous_timestamp >= item[0] and counter > 1: #se il timestamp attuale è uguale a quello precedente (salvo sia al primo ciclo for; in quel caso ovviamente sarebbero uguali visto che ho assegnato previous_timestamp al primo timestamp di default)...
+            raise ExamException ("Errore: c'è un timestamp fuori posto o duplicato (compute)") #...alzo un eccezione...
         else: #...altrimenti...
             previous_timestamp = item[0] #...riassegno il timestamp precedente a quello attuale
         if item[0] < (current_day + 86400) and (item[0] >= current_day): #se il timestamp appartiene al giorno in questione...
             tmp_list.append(item[1]) #...aggiungo la temperatura alla lista temporanea
             counter = counter + 1 #incremento il contatore
         if item[0] < current_day or item[0] >= (current_day+172800): #se c'è un timestamp fuori posto, quindi se precede il giorno corrente o se salta un giorno...
-            raise ExamException ("Errore: c'è un timestamp fuori posto") #...alzo un'eccezione
+            raise ExamException ("Errore: c'è un timestamp fuori posto (compute)") #...alzo un'eccezione
         if (item[0] >= (current_day + 86400) and item[0] < (current_day+172800)) or (current_day == last_day and counter == len(time_series) + 1): #se il timestamp appartiene al giorno successivo o sono all'ultimo giorno e all'ultimo valore...
             diff_list.append(diff_maxmin(tmp_list)) #passo lista temporanea a funzione che calcola differenza massima e aggiungo il risultato alla lista che dovrò ritornare
             current_day = current_day + 86400 #passo al giorno successivo
@@ -108,6 +118,9 @@ def compute_daily_max_difference (time_series):
 class ExamException (Exception):
     pass
 
-time_series_file = CSVTimeSeriesFile(name='data.csv')
+time_series_file = CSVTimeSeriesFile(name='datat.csv')
 time_series = time_series_file.get_data()
 diff = compute_daily_max_difference(time_series)
+for item in diff:
+    print(item)
+    
