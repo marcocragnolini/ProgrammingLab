@@ -114,7 +114,7 @@ def compute_daily_max_difference (time_series):
             counter = counter + 1 #incremento il contatore
             tmp_list = [item[1]]  #istanzio la lista temporanea alla temperatura corrente; se instanziassi a vuota salterei ogni volta il primo valore della giornata        
         if current_day == last_day and second_last_day!=last_day: #se l'ultimo e il penultimo giorno non corrispondono significa che l'ultimo è un valore isolato, quindi devo gestirlo a parte
-            diff_list.append(diff_maxmin(tmp_list))
+            diff_list.append(diff_maxmin(tmp_list)) #aggiungo alla lista da tornare
     return diff_list
         
         
@@ -122,4 +122,6 @@ def compute_daily_max_difference (time_series):
             
 class ExamException (Exception):
     pass
+
+
     
