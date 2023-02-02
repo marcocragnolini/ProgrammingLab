@@ -122,9 +122,4 @@ def compute_daily_max_difference (time_series):
             
 class ExamException (Exception):
     pass
-
-time_series_file = CSVTimeSeriesFile(name = 'oneline.csv')
-time_series = time_series_file.get_data()
-diff = compute_daily_max_difference(time_series)
-print(diff)
     
