@@ -57,7 +57,7 @@ class CSVTimeSeriesFile (CSVFile):
             raise ExamException ('Errore: la lista non è una lista')
         return time_series_list
 
-def diff_maxmin (numeric_list):
+def diff_maxmin (numeric_list): #non faccio controlli perchè se la lista in input è arrivata qui è già stata controllata due volte
     min = numeric_list[0] #assumo che il minimo sia il primo valore
     max = numeric_list[0] #assumo anche che il massimo sia il primo valore
     for i in range(1,len(numeric_list)): #finchè sono nella lista
@@ -85,6 +85,10 @@ def compute_daily_max_difference (time_series):
         last_day = last[0] - (last[0]%86400) #creo una variabile che contenga l'inizio dell'ultimo giorno della lista time_series
         second_last = time_series[len(time_series)-2] #creo una lista che contenga la penultima sottolista della lista time_series
         second_last_day = second_last[0] - (second_last[0]%86400) #creo una variabile che contenga l'inizio del giorno della penultima lista
+        for item in time_series: #faccio dei controlli per vedere se la lista è totalmente numerica (in caso contrario alzo eccezioni)
+            tmp = float(item[0])
+            tmp = int(tmp)
+            tmp = float(item[1])
     except ValueError as v:
         raise ExamException ("Errore: {}".format(v))
     except TypeError as t:
@@ -119,7 +123,7 @@ def compute_daily_max_difference (time_series):
 class ExamException (Exception):
     pass
 
-time_series_file = CSVTimeSeriesFile(name='datat.csv')
+time_series_file = CSVTimeSeriesFile(name = 'datat.csv')
 time_series = time_series_file.get_data()
 diff = compute_daily_max_difference(time_series)
 for item in time_series:
