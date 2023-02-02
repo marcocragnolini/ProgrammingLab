@@ -27,13 +27,16 @@ class CSVTimeSeriesFile (CSVFile):
                 elements[0] = float(elements[0]) #il timestamp in float per evitare che sia saltato nel caso in cui sia un decimale (o che dia un errore)...
                 elements[0] = int(elements[0]) #...poi lo trasformo in intero
                 elements[1] = float(elements[1]) #la temperatura in float 
+                to_be_appended = [elements[0],elements[1]] #creo una lista temporanea che mi serve a lasciare fuori eventuali stringhe in eccesso
             except ValueError:
                 continue
             except TypeError:
                 continue
             except Exception:
                 continue
-            time_series_list.append(elements) #aggiungo la lista elements alla lista che dovrò ritornare
+            time_series_list.append(to_be_appended) #aggiungo la lista elements alla lista che dovrò ritornare
+        if len(time_series_list) == 0: #controllo che il file non fosse vuoto verificando che non mi abbia creato una lista vuota
+            raise ExamException ('Errore: il file ha creato una lista vuota')
         first = time_series_list[0] #assegno a first la prima sottolista di time_series_list
         previous_timestamp = first[0] #assegno di default il timestamp precedente al primo
         first_round = True #sono al primo giro quindi lo assegno a vero di default
@@ -48,8 +51,6 @@ class CSVTimeSeriesFile (CSVFile):
                 raise ExamException ("Errore: ci sono due timestamp consecutivi uguali (get_data)") #...alzo un eccezione
             else: #nel caso ci sia un timestamp > al suo successivo... 
                 raise ExamException ("Errore: c'è un timestamp fuori posto (get_data)") #...alzo un eccezione
-        if len(time_series_list) == 0: #controllo che il file non fosse vuoto verificando che non mi abbia creato una lista vuota
-            raise ExamException ('Errore: il file ha creato una lista vuota')
         if time_series_list is None: #controllo che la lista non sia None anche se è improbabile
             raise ExamException ('Errore: la lista è None')
         if not isinstance(time_series_list,list):
@@ -121,6 +122,8 @@ class ExamException (Exception):
 time_series_file = CSVTimeSeriesFile(name='datat.csv')
 time_series = time_series_file.get_data()
 diff = compute_daily_max_difference(time_series)
+for item in time_series:
+    print(item)
 for item in diff:
     print(item)
     
